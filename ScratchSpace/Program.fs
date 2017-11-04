@@ -39,9 +39,24 @@ let sumOdds list =
 
 let length() =
     List.fold (fun acc _ -> acc + 1) 0
+
+let removeOddIndicies list =
+    List.mapi (fun i x -> (i+1, x)) list |> List.filter (fun x -> fst x % 2 = 0) |> List.map snd
+
+let removeOddIndicies2 list =
+    List.mapi (fun i x -> (i+1, x)) list |> List.fold (fun acc elem -> if fst elem % 2 = 0 then (snd elem)::acc else acc) [] |> List.rev
+
+let rec removeOddIndicies3 list =
+    match list with
+    | _::x::xs -> x::(removeOddIndicies3 xs)
+    | _ -> []
+
+let createListOfLengthN N = 
+    List.init N (fun i -> i)
+
 [<EntryPoint>]
 let main argv = 
-    //let N = System.Console.ReadLine() |> int
+    let N = System.Console.ReadLine() |> int
     //readListFromInput() |> filter_ (fun x -> x < N) |> printList
-    printfn "%d" (readListFromInput() |> length())
+    printfn "%A" (createListOfLengthN N)
     0 // return an integer exit code
