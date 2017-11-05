@@ -6,20 +6,15 @@
 let printList l = 
     l |> Seq.iter (printf "%A\n")
 
-let readListFromInput() = 
+let readListFromInput converter = 
     let rec readHelper entries = 
         match System.Console.ReadLine() with 
         | "" | null -> List.rev entries
-        | e -> readHelper ((e |> int) :: entries)
+        | e -> readHelper ((converter e) :: entries)
     readHelper []
 
-let readDoubleListFromInput() = 
-    let rec readHelper entries = 
-        match System.Console.ReadLine() with 
-        | "" | null -> List.rev entries
-        | e -> readHelper ((e |> double) :: entries)
-    readHelper []
-
+let asInt = fun e -> e |> int
+let asDouble = fun e -> e |> double
 
 let rec printHelloWorld n = 
     match n with 
@@ -76,6 +71,6 @@ let exp x : double =
 [<EntryPoint>]
 let main argv = 
     let N = System.Console.ReadLine() |> int
-    readDoubleListFromInput() |> List.map exp  |> Seq.iter (printf "%.4f\n")
+    readListFromInput asDouble |> List.map exp  |> Seq.iter (printf "%.4f\n")
     //printfn "%A" (createListOfLengthN N)
     0 // return an integer exit code
