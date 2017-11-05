@@ -13,8 +13,9 @@ let readListFromInput converter =
         | e -> readHelper ((converter e) :: entries)
     readHelper []
 
-let asInt = fun e -> e |> int
-let asDouble = fun e -> e |> double
+let asInts = fun e -> e |> int
+let asDoubles = fun e -> e |> double
+let asIntList = fun (e:string) -> e.Split(' ') |> Array.toList |> List.map System.Int32.Parse 
 
 let rec printHelloWorld n = 
     match n with 
@@ -70,7 +71,10 @@ let exp x : double =
 
 [<EntryPoint>]
 let main argv = 
-    let N = System.Console.ReadLine() |> int
-    readListFromInput asDouble |> List.map exp  |> Seq.iter (printf "%.4f\n")
+    //let N = System.Console.ReadLine() |> int
+    //readListFromInput asDoubles |> List.map abs  |> Seq.iter (printf "%.4f\n")
     //printfn "%A" (createListOfLengthN N)
+    let L = readListFromInput asIntList
+    printfn "%A" L
+    
     0 // return an integer exit code
