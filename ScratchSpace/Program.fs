@@ -13,6 +13,14 @@ let readListFromInput() =
         | e -> readHelper ((e |> int) :: entries)
     readHelper []
 
+let readDoubleListFromInput() = 
+    let rec readHelper entries = 
+        match System.Console.ReadLine() with 
+        | "" | null -> List.rev entries
+        | e -> readHelper ((e |> double) :: entries)
+    readHelper []
+
+
 let rec printHelloWorld n = 
     match n with 
     | 0 -> "\n"
@@ -52,11 +60,22 @@ let rec removeOddIndicies3 list =
     | _ -> []
 
 let createListOfLengthN N = 
-    List.init N (fun i -> i)
+    //List.init N (fun i -> i)
+    [0 .. N]
+
+let factorial n =
+    let rec factaux i acc = 
+        match i with 
+        | 0 | 1 -> acc
+        | _ -> factaux (i-1) (acc*i)
+    factaux n 1
+
+let exp x : double =
+    [0 .. 9] |> List.map (fun n -> (pown x n) / ((factorial n) |> double)) |> List.sum 
 
 [<EntryPoint>]
 let main argv = 
     let N = System.Console.ReadLine() |> int
-    //readListFromInput() |> filter_ (fun x -> x < N) |> printList
-    printfn "%A" (createListOfLengthN N)
+    readDoubleListFromInput() |> List.map exp  |> Seq.iter (printf "%.4f\n")
+    //printfn "%A" (createListOfLengthN N)
     0 // return an integer exit code
