@@ -69,12 +69,41 @@ let factorial n =
 let exp x : double =
     [0 .. 9] |> List.map (fun n -> (pown x n) / ((factorial n) |> double)) |> List.sum 
 
+type Polynomial = 
+    { coeff_exp_pair : (int*int) list}
+    member private this.printPolyElement pe = 
+        let sign = if (fst pe) < 0 then "-" else "+"
+        match pe with 
+        | (0, _) -> ""
+        | (c, 0) -> sprintf "%s%d" sign (abs c)
+        | (c, 1) when (abs c) <> 1 -> sprintf "%s%dx" sign (abs c)
+        | (1, 1) -> "x"
+        | (-1, 1) -> "-x"
+        | (1, e) when e <> 0 -> sprintf "%sx^%d" sign e
+        | (c, e) -> sprintf "%s%dx^%d" sign (abs c) e
+    override m.ToString() = 
+        let rec printHelper e = 
+            match e with
+            | t::[] -> m.printPolyElement t
+            | h::t -> m.printPolyElement h + printHelper t
+            | _ -> "\n"
+        printHelper m.coeff_exp_pair
+
+type Bounds = { lower : double; upper: double}
+let makePoly coeffs exps = {coeff_exp_pair = List.zip coeffs exps}
+let makeBounds (b:int list) = {lower = double b.[0]; upper = double b.[1]}
+let eval (p:Polynomial) (x:double) = p.coeff_exp_pair |> List.map (fun ce -> double (fst ce) * (pown x (snd ce))) |> List.sum
+
 [<EntryPoint>]
 let main argv = 
     //let N = System.Console.ReadLine() |> int
     //readListFromInput asDoubles |> List.map abs  |> Seq.iter (printf "%.4f\n")
     //printfn "%A" (createListOfLengthN N)
-    let L = readListFromInput asIntList
-    printfn "%A" L
-    
+    let inp = readListFromInput asIntList
+    let p = makePoly inp.[0] inp.[1]
+    let bounds = makeBounds inp.[2]
+    printfn "%O" p
+    printfn "%f @ lower" (eval p bounds.lower)
+    printfn "%f @ upper" (eval p bounds.upper)
+
     0 // return an integer exit code
