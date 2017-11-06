@@ -71,23 +71,23 @@ let exp x : double =
 
 type Polynomial = 
     { coeff_exp_pair : (int*int) list}
-    member private this.printPolyElement pe = 
-        let sign = if (fst pe) < 0 then "-" else "+"
+    member private this.printPolyElement pe n = 
+        let sign = if (fst pe) < 0 then "-" else (if n <> 0 then "+" else "")
         match pe with 
         | (0, _) -> ""
         | (c, 0) -> sprintf "%s%d" sign (abs c)
         | (c, 1) when (abs c) <> 1 -> sprintf "%s%dx" sign (abs c)
-        | (1, 1) -> "x"
+        | (1, 1) -> "+x"
         | (-1, 1) -> "-x"
         | (1, e) when e <> 0 -> sprintf "%sx^%d" sign e
         | (c, e) -> sprintf "%s%dx^%d" sign (abs c) e
     override m.ToString() = 
-        let rec printHelper e = 
+        let rec printHelper e n = 
             match e with
-            | t::[] -> m.printPolyElement t
-            | h::t -> m.printPolyElement h + printHelper t
+            | t::[] -> m.printPolyElement t n
+            | h::t -> m.printPolyElement h n + printHelper t (n+1)
             | _ -> "\n"
-        printHelper m.coeff_exp_pair
+        printHelper m.coeff_exp_pair 0
 
 type Bounds = { lower : double; upper: double}
 let makePoly coeffs exps = {coeff_exp_pair = List.zip coeffs exps}
