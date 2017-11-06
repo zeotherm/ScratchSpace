@@ -1,4 +1,4 @@
-﻿open System
+﻿open System.Security.Cryptography.X509Certificates
 
 // Learn more about F# at http://fsharp.org
 // See the 'F# Tutorial' project for more help.
@@ -94,6 +94,17 @@ let makePoly coeffs exps = {coeff_exp_pair = List.zip coeffs exps |> List.sortBy
 let makeBounds (b:int list) = {lower = double b.[0]; upper = double b.[1]}
 let eval (p:Polynomial) (x:double) = p.coeff_exp_pair |> List.map (fun ce -> double (fst ce) * (pown x (snd ce))) |> List.sum
 
+let integrate_aux (f: double -> double) (w:double->double) (bounds:Bounds) dx = 
+    let N = ((int bounds.upper) - (int bounds.lower)) * (int (1.0/dx))
+    let x_is = List.init N (fun i -> bounds.lower + dx*(double i + 1.0))
+    x_is |> List.map (f >> w) |> List.sum
+
+let integrate f bounds dx = 
+    integrate_aux f (fun x -> x*dx) bounds dx
+
+let volumeOfRevolution f bounds dx =
+    integrate_aux f (fun x -> System.Math.PI*x**2.0*dx) bounds dx
+
 [<EntryPoint>]
 let main argv = 
     //let N = System.Console.ReadLine() |> int
@@ -105,5 +116,10 @@ let main argv =
     printfn "%O" p
     printfn "%f @ lower" (eval p bounds.lower)
     printfn "%f @ upper" (eval p bounds.upper)
+    let deltax = 0.001
+    let f = (eval p)
+    printfn "%f" (integrate f bounds deltax)
+    printfn "%f" (volumeOfRevolution f bounds deltax)
+
 
     0 // return an integer exit code
