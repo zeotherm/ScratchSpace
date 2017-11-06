@@ -90,7 +90,7 @@ type Polynomial =
         printHelper m.coeff_exp_pair 0
 
 type Bounds = { lower : double; upper: double}
-let makePoly coeffs exps = {coeff_exp_pair = List.zip coeffs exps}
+let makePoly coeffs exps = {coeff_exp_pair = List.zip coeffs exps |> List.sortByDescending (fun ce -> snd ce)}
 let makeBounds (b:int list) = {lower = double b.[0]; upper = double b.[1]}
 let eval (p:Polynomial) (x:double) = p.coeff_exp_pair |> List.map (fun ce -> double (fst ce) * (pown x (snd ce))) |> List.sum
 
