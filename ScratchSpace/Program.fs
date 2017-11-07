@@ -133,15 +133,19 @@ let rec processTestCaseInput tci =
     | h :: t -> let num_elem = List.head h
                 makeTestCase(List.take num_elem t) :: processTestCaseInput (List.skip num_elem t)
     | _ -> []
-let isValidFunction opGroup = 
-    "YES"
+
+let isValidFunction tc = 
+    let testOneX tc = 
+        let ys = List.fold (fun (acc: int list) (elem:OrderedPair) -> elem.x :: acc) [] tc
+        let h = List.head ys
+        if List.forall ((<>) h) (List.tail ys) then true else false
+    let xs = List.groupBy (fun e -> e.x) tc |> List.map snd
+    if (List.map testOneX xs |> List.fold (fun acc elem -> acc && elem) true ) then "YES" else "NO"
+
 [<EntryPoint>]
-let main argv = 
+let main argv =
+    //integrationProblem()
     //let N = System.Console.ReadLine() |> int
     let input = readListFromInput asIntList
-    printfn "%A" input
-    let tc = processTestCaseInput (List.tail input)
-    tc |> List.iter (printf "%O\n")
-    let item = tc.[0]
-    tc |> List.map (List.groupBy (fun e -> e.x) >> isValidFunction) |> Seq.iter (printf "%A\n")
+    processTestCaseInput (List.tail input) |> List.map isValidFunction |> Seq.iter (printfn "%s")
     0 // return an integer exit code
