@@ -133,7 +133,8 @@ let rec processTestCaseInput tci =
     | h :: t -> let num_elem = List.head h
                 makeTestCase(List.take num_elem t) :: processTestCaseInput (List.skip num_elem t)
     | _ -> []
-
+let isValidFunction opGroup = 
+    "YES"
 [<EntryPoint>]
 let main argv = 
     //let N = System.Console.ReadLine() |> int
@@ -141,5 +142,6 @@ let main argv =
     printfn "%A" input
     let tc = processTestCaseInput (List.tail input)
     tc |> List.iter (printf "%O\n")
-
+    let item = tc.[0]
+    tc |> List.map (List.groupBy (fun e -> e.x) >> isValidFunction) |> Seq.iter (printf "%A\n")
     0 // return an integer exit code
