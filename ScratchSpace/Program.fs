@@ -1,6 +1,4 @@
-﻿open System.Security.Cryptography.X509Certificates
-
-// Learn more about F# at http://fsharp.org
+﻿// Learn more about F# at http://fsharp.org
 // See the 'F# Tutorial' project for more help.
 
 let printList l = 
@@ -23,11 +21,11 @@ let rec printHelloWorld n =
     | i when i > 0 -> "Hello World\n" + printHelloWorld (i-1)
     | _ -> failwith "Number must be positive"
 
-let filter_ f xs =
+let filter_ pred xs =
     let rec filterhelper acc list =
         match list with
         | [] -> List.rev acc 
-        | h :: t when f h -> filterhelper (h::acc) t 
+        | h :: t when pred h -> filterhelper (h::acc) t 
         | _ :: t -> filterhelper acc t
     filterhelper [] xs
 
@@ -100,16 +98,12 @@ let integrate_aux (f: double -> double) (w:double->double) (bounds:Bounds) dx =
     x_is |> List.map (f >> w) |> List.sum
 
 let integrate f bounds dx = 
-    integrate_aux f (fun x -> x*dx) bounds dx
+    integrate_aux f (fun f_x -> f_x*dx) bounds dx
 
 let volumeOfRevolution f bounds dx =
-    integrate_aux f (fun x -> System.Math.PI*x**2.0*dx) bounds dx
+    integrate_aux f (fun f_x -> System.Math.PI*f_x**2.0*dx) bounds dx
 
-[<EntryPoint>]
-let main argv = 
-    //let N = System.Console.ReadLine() |> int
-    //readListFromInput asDoubles |> List.map abs  |> Seq.iter (printf "%.4f\n")
-    //printfn "%A" (createListOfLengthN N)
+let integrationProblem() = 
     let inp = readListFromInput asIntList
     let p = makePoly inp.[0] inp.[1]
     let bounds = makeBounds inp.[2]
@@ -121,5 +115,27 @@ let main argv =
     printfn "%f" (integrate f bounds deltax)
     printfn "%f" (volumeOfRevolution f bounds deltax)
 
+type OrderedPair = 
+    { x : int; y : int}
+    override m.ToString() = sprintf "(%d,%d)" m.x m.y
+type TestCase = OrderedPair list
+
+let makeOrderedPair elem = 
+    match elem with 
+    | i::j::[] -> { x = i; y = j}
+    | _ -> failwith "Not a valid pair entry"
+
+let makeTestCase inp = 
+    inp |> List.fold (fun acc elem -> (makeOrderedPair elem)::acc) []
+
+[<EntryPoint>]
+let main argv = 
+    //let N = System.Console.ReadLine() |> int
+    //readListFromInput asDoubles |> List.map abs  |> Seq.iter (printf "%.4f\n")
+    //printfn "%A" (createListOfLengthN N)
+    let input = readListFromInput asIntList
+    printfn "%A" input
+    let tc = makeTestCase input
+    tc |> Seq.iter (printf "%O\n")
 
     0 // return an integer exit code
