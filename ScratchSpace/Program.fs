@@ -128,14 +128,18 @@ let makeOrderedPair elem =
 let makeTestCase inp = 
     inp |> List.fold (fun acc elem -> (makeOrderedPair elem)::acc) []
 
+let rec processTestCaseInput tci = 
+    match tci with
+    | h :: t -> let num_elem = List.head h
+                makeTestCase(List.take num_elem t) :: processTestCaseInput (List.skip num_elem t)
+    | _ -> []
+
 [<EntryPoint>]
 let main argv = 
     //let N = System.Console.ReadLine() |> int
-    //readListFromInput asDoubles |> List.map abs  |> Seq.iter (printf "%.4f\n")
-    //printfn "%A" (createListOfLengthN N)
     let input = readListFromInput asIntList
     printfn "%A" input
-    let tc = makeTestCase input
-    tc |> Seq.iter (printf "%O\n")
+    let tc = processTestCaseInput (List.tail input)
+    tc |> List.iter (printf "%O\n")
 
     0 // return an integer exit code
