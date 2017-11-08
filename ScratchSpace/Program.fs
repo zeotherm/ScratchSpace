@@ -119,7 +119,7 @@ type OrderedPair =
     { x : int; y : int}
     override m.ToString() = sprintf "(%d,%d)" m.x m.y
 type TestCase = OrderedPair list
-
+type Polygon = OrderedPair list
 let makeOrderedPair elem = 
     match elem with 
     | i::j::[] -> { x = i; y = j}
@@ -142,10 +142,21 @@ let isValidFunction tc =
     let xs = List.groupBy (fun e -> e.x) tc |> List.map snd
     if (List.map testOneX xs |> List.fold (fun acc elem -> acc && elem) true ) then "YES" else "NO"
 
+let distance (p:OrderedPair) (q:OrderedPair) = 
+    System.Math.Sqrt(pown (double p.x - double q.x) 2 + pown (double p.y - double q.y) 2)
+
+let perimeter (p:Polygon) = 
+    let rec perimeter_helper p_aug = 
+        match p_aug with 
+        | p::q::t -> distance p q + perimeter_helper (q::t)
+        | _ -> 0.0
+    if List.head p <> List.last p then 
+        perimeter_helper ((List.head p)::(List.rev p)) 
+    else 
+        perimeter_helper p
+
 [<EntryPoint>]
 let main argv =
-    //integrationProblem()
-    //let N = System.Console.ReadLine() |> int
-    let input = readListFromInput asIntList
-    processTestCaseInput (List.tail input) |> List.map isValidFunction |> Seq.iter (printfn "%s")
+    let points = List.tail (readListFromInput asIntList) |> List.map makeOrderedPair
+    printfn "%f" (perimeter points)
     0 // return an integer exit code
