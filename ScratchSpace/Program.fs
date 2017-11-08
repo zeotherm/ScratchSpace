@@ -145,15 +145,21 @@ let isValidFunction tc =
 let distance (p:OrderedPair) (q:OrderedPair) = 
     System.Math.Sqrt(pown (double p.x - double q.x) 2 + pown (double p.y - double q.y) 2)
 
+let PolygonCloser (p:Polygon) =
+    if List.head p <> List.last p then 
+        (List.head p)::(List.rev p)
+    else 
+        p
+
 let perimeter (p:Polygon) = 
     let rec perimeter_helper p_aug = 
         match p_aug with 
         | p::q::t -> distance p q + perimeter_helper (q::t)
         | _ -> 0.0
-    if List.head p <> List.last p then 
-        perimeter_helper ((List.head p)::(List.rev p)) 
-    else 
-        perimeter_helper p
+    perimeter_helper (PolygonCloser p)
+
+let area (p:Polygon) =
+    0.0
 
 [<EntryPoint>]
 let main argv =
