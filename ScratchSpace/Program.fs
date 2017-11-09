@@ -159,10 +159,27 @@ let perimeter (p:Polygon) =
     perimeter_helper (PolygonCloser p)
 
 let area (p:Polygon) =
-    0.0
+    let rec area_helper (pgon:Polygon) =
+        match pgon with
+        | p::q::t -> double (p.x*q.y - q.x*p.y) + area_helper (q::t)
+        | _ -> 0.0
+    0.5 * System.Math.Abs (area_helper (PolygonCloser p))
+
+let rec gcd a b =
+    match b with 
+    | 0 -> a
+    | _ -> gcd b (a % b)
+
+let fibonacci N =
+    let rec fibhelper n a b =
+        match n with 
+        | 0 -> a
+        | 1 -> b
+        | _ -> fibhelper (n-1) b (a+b)
+    fibhelper (N-1) 0 1
 
 [<EntryPoint>]
 let main argv =
-    let points = List.tail (readListFromInput asIntList) |> List.map makeOrderedPair
-    printfn "%f" (perimeter points)
+    let inp = System.Console.ReadLine() |> asInts
+    printfn "%d" (fibonacci inp)
     0 // return an integer exit code
