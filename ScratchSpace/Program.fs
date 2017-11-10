@@ -178,8 +178,34 @@ let fibonacci N =
         | _ -> fibhelper (n-1) b (a+b)
     fibhelper (N-1) 0 1
 
+let memoize f =
+    let cache = ref Map.empty
+    fun x ->
+        match (!cache).TryFind(x) with
+        | Some res -> res
+        | None ->
+             let res = f x
+             cache := (!cache).Add(x,res)
+             res
+   
+let rec Pascal n r =
+    match (n, r) with 
+    | (_,0) -> 1
+    | (x, y) when x = y -> 1
+    | (row, col) -> Pascal (row-1) col + Pascal (row-1) (col-1)
+
+let PascalM = memoize Pascal
+
+let PascalRow r =
+    [0..r] |> List.map (PascalM r) 
+
+let printListOfLists ls =
+    List.map (fun l -> List.iter ( fun i -> printf "%d " i) l 
+                       printfn "") ls
+                        
+
 [<EntryPoint>]
 let main argv =
-    let inp = System.Console.ReadLine() |> asInts
-    printfn "%d" (fibonacci inp)
+    let inp = System.Console.ReadLine() |> int
+    [0..inp] |> List.map PascalRow |> printListOfLists |> ignore
     0 // return an integer exit code
