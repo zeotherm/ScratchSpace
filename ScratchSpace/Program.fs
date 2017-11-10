@@ -1,4 +1,6 @@
-﻿// Learn more about F# at http://fsharp.org
+﻿open System.Security.AccessControl
+
+// Learn more about F# at http://fsharp.org
 // See the 'F# Tutorial' project for more help.
 
 let printList l = 
@@ -14,6 +16,7 @@ let readListFromInput converter =
 let asInts = fun e -> e |> int
 let asDoubles = fun e -> e |> double
 let asIntList = fun (e:string) -> e.Split(' ') |> Array.toList |> List.map System.Int32.Parse 
+let asStrings = id
 
 let rec printHelloWorld n = 
     match n with 
@@ -199,13 +202,62 @@ let PascalM = memoize Pascal
 let PascalRow r =
     [0..r] |> List.map (PascalM r) 
 
-let printListOfLists ls =
+let printListOfLists() =
     List.map (fun l -> List.iter ( fun i -> printf "%d " i) l 
-                       printfn "") ls
+                       printfn "") 
                         
+let collate p q = 
+    let rec collate_aux acc ps qs =
+        match ps, qs with
+        | [], [] -> acc
+        | ph::pt, qh::qt -> collate_aux (qh::ph::acc) pt qt
+        | _ -> failwith "different length strings"
+    collate_aux [] p q |> List.rev |> List.toArray |> System.String
+
+let swapadjacent xs =
+    let rec swapadj_aux acc ys =
+        match ys with
+        | p::q::t -> swapadj_aux (p::q::acc) t
+        | _ -> acc
+    swapadj_aux [] (List.ofSeq xs) |> List.rev |> List.toArray |> System.String
+
+let pack xs =
+    let rec pack_aux acc x = 
+        match x with 
+        | [] -> acc 
+        | h::t ->
+            match acc with
+            | [] -> pack_aux [(h, 1)] t
+            | (i, count) :: ta ->
+                if h = i then
+                    pack_aux ((i, count+1) :: ta) t
+                else
+                    pack_aux ((h, 1) :: (i, count) :: ta) t
+    pack_aux [] xs |> List.rev
+
+type PackStruct = (char*int) list
+
+let printPS (ps:PackStruct) =
+    let print_aux ci =
+        if (snd ci) <> 1 then
+            printf "%c%i" (fst ci) (snd ci)
+        else
+            printf "%c" (fst ci)
+
+    ps |> ((List.iter print_aux) >> (fun x -> printfn "") )
+                    
 
 [<EntryPoint>]
 let main argv =
-    let inp = System.Console.ReadLine() |> int
-    [0..inp] |> List.map PascalRow |> printListOfLists |> ignore
+    //let N = System.Console.ReadLine() |> int
+    //let inputs = readListFromInput asStrings
+    let msg = System.Console.ReadLine()
+    printPS ([for c in msg -> c] |> pack)
+
+    //List.map swapadjacent inputs |> List.iter (fun s -> printfn "%s" s)
+
+    //let P = System.Console.ReadLine()
+    //let Q = System.Console.ReadLine()
+    //printfn "%s" (collate (List.ofSeq P) (List.ofSeq Q))
+    
     0 // return an integer exit code
