@@ -246,18 +246,37 @@ let printPS (ps:PackStruct) =
 
     ps |> ((List.iter print_aux) >> (fun x -> printfn "") )
                     
+let rotations (S:string) =
+    let N = S.Length
+    let sa = [for c in S -> c] |> List.toArray
+    let indicies = [0..N-1]
+    let rotations = [for i in indicies do yield [for j in indicies -> (i+j+1)%N]]
+    let f = fun r -> [for idx in r -> sa.[idx]] |> List.toArray |> System.String
+    List.map f rotations |> List.iter (printf "%s ") |> ignore
+    printfn ""
 
 [<EntryPoint>]
 let main argv =
-    //let N = System.Console.ReadLine() |> int
-    //let inputs = readListFromInput asStrings
-    let msg = System.Console.ReadLine()
-    printPS ([for c in msg -> c] |> pack)
+    let N = System.Console.ReadLine() |> int
+    let inputs = readListFromInput asStrings
+    //let msg = System.Console.ReadLine()
+    //printPS ([for c in msg -> c] |> pack)
 
     //List.map swapadjacent inputs |> List.iter (fun s -> printfn "%s" s)
 
     //let P = System.Console.ReadLine()
     //let Q = System.Console.ReadLine()
     //printfn "%s" (collate (List.ofSeq P) (List.ofSeq Q))
-    
+    //let is = [0;1;2]
+    //let isp = [for i in is do yield [for j in is -> (i+j+1)%3]]
+    //let S = "abc"
+    //let sa = [for c in S -> c] |> List.toArray
+    //let r1 = [for idx in isp.[0] -> sa.[idx]] |> List.toArray |> System.String
+    //let f = fun r -> [for idx in r -> sa.[idx]] |> List.toArray |> System.String
+    //let rs = List.map f isp
+    //let g:(int list -> int list) = List.permute (fun index -> index  % 3)
+    //let rs2 = List.map (g) isp
+
+    List.iter rotations inputs
+
     0 // return an integer exit code
