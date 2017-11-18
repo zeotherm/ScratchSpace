@@ -173,13 +173,8 @@ let rec gcd a b =
     | 0 -> a
     | _ -> gcd b (a % b)
 
-let fibonacci N =
-    let rec fibhelper n a b =
-        match n with 
-        | 0 -> a
-        | 1 -> b
-        | _ -> fibhelper (n-1) b (a+b)
-    fibhelper (N-1) 0 1
+let modvalBI = System.Numerics.BigInteger (pown 10 8 + 7)
+let modval = pown 10 8 + 7
 
 let memoize f =
     let cache = ref Map.empty
@@ -190,7 +185,15 @@ let memoize f =
              let res = f x
              cache := (!cache).Add(x,res)
              res
-   
+
+let fibonacci N =
+    let rec fibhelper n a b =
+        match n with 
+        | 0 -> a
+        | 1 -> b
+        | _ -> fibhelper (n-1) (b%modval) ((a%modval+b%modval)%modval)
+    fibhelper (N-1) 0 1
+
 let rec Pascal n r =
     match (n, r) with 
     | (_,0) -> 1
@@ -255,28 +258,24 @@ let rotations (S:string) =
     List.map f rotations |> List.iter (printf "%s ") |> ignore
     printfn ""
 
+let higherFibs = Seq.unfold (fun (a,b) -> 
+                                        //let next = if a + b > modval then (a%modval + b%modval)%modval
+                                        //           else a + b
+                                        let bmv = b%modval
+                                        let next = (a + bmv)%modval
+                                        Some(next, (bmv, next))) (0,1)
+let fib01 = [0;1] |> List.toSeq
+let fib01I = [0I; 1I] |> List.toSeq
+let fibSeq = Seq.append fib01 higherFibs
+
 [<EntryPoint>]
 let main argv =
     let N = System.Console.ReadLine() |> int
-    let inputs = readListFromInput asStrings
-    //let msg = System.Console.ReadLine()
-    //printPS ([for c in msg -> c] |> pack)
-
-    //List.map swapadjacent inputs |> List.iter (fun s -> printfn "%s" s)
-
-    //let P = System.Console.ReadLine()
-    //let Q = System.Console.ReadLine()
-    //printfn "%s" (collate (List.ofSeq P) (List.ofSeq Q))
-    //let is = [0;1;2]
-    //let isp = [for i in is do yield [for j in is -> (i+j+1)%3]]
-    //let S = "abc"
-    //let sa = [for c in S -> c] |> List.toArray
-    //let r1 = [for idx in isp.[0] -> sa.[idx]] |> List.toArray |> System.String
-    //let f = fun r -> [for idx in r -> sa.[idx]] |> List.toArray |> System.String
-    //let rs = List.map f isp
-    //let g:(int list -> int list) = List.permute (fun index -> index  % 3)
-    //let rs2 = List.map (g) isp
-
-    List.iter rotations inputs
-
+    let inputs = readListFromInput asInts  
+    //let highestOutput = Seq.item 10000 fibSeq
+    let stopWatch = System.Diagnostics.Stopwatch.StartNew()
+    for i in [1000..10000] do
+        printfn "%A" (Seq.item i fibSeq)
+    stopWatch.Stop()
+    printfn "%f" stopWatch.Elapsed.TotalMilliseconds
     0 // return an integer exit code
