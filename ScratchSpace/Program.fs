@@ -259,12 +259,10 @@ let rotations (S:string) =
     printfn ""
 
 let higherFibs = Seq.unfold (fun (a,b) -> 
-                                        //let next = if a + b > modval then (a%modval + b%modval)%modval
-                                        //           else a + b
                                         let bmv = b%modval
                                         let next = (a + bmv)%modval
                                         Some(next, (bmv, next))) (0,1)
-let fib01 = [0;1] |> List.toSeq
+let fib01 = seq {0 .. 1} 
 let fib01I = [0I; 1I] |> List.toSeq
 let fibSeq = Seq.append fib01 higherFibs
 

@@ -5,6 +5,8 @@ VisualStudioVersion = 15.0.27004.2006
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "ScratchSpace", "ScratchSpace\ScratchSpace.fsproj", "{8E2BC61A-C5A0-4145-BE5C-D63C15C5F1BD}"
 EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Derivative", "Derivative\Derivative.fsproj", "{46FE34AC-68A1-455F-91B9-A42E81D6E1A9}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{8E2BC61A-C5A0-4145-BE5C-D63C15C5F1BD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8E2BC61A-C5A0-4145-BE5C-D63C15C5F1BD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8E2BC61A-C5A0-4145-BE5C-D63C15C5F1BD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{46FE34AC-68A1-455F-91B9-A42E81D6E1A9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{46FE34AC-68A1-455F-91B9-A42E81D6E1A9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{46FE34AC-68A1-455F-91B9-A42E81D6E1A9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{46FE34AC-68A1-455F-91B9-A42E81D6E1A9}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
