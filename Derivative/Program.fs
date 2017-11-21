@@ -54,23 +54,22 @@ let (|Func|_|) (x : Expression) =
 let ZERO = Const( 0.)
 let ONE = Const( 1.)
 let TWO = Const( 2.)
-
 let rec Derivative x : Expression = 
     match x with
-    | X -> ONE
-    | Const(n) -> ZERO
+    | X -> Const( 1.)
+    | Const(n) -> Const( 0.)
     | Neg(e) -> Neg(Derivative(e))
     | Add(e1, e2) -> Add( Derivative(e1), Derivative(e2))
     | Sub(e1, e2) -> Sub( Derivative(e1), Derivative(e2))
     | Mul(e1, e2) -> Add( Mul(Derivative(e1), e2), Mul(e1, Derivative(e2)))
-    | Div(e1, e2) -> Div( Sub(Mul(Derivative(e1), e2), Mul(e1, Derivative(e2))), (Pow(e2, Const(2))))
+    | Div(e1, e2) -> Div( Sub(Mul(Derivative(e1), e2), Mul(e1, Derivative(e2))), Pow(e2, Const(2.0)))
     | Pow(e, Const(n)) -> Mul( Const(n), Pow(e, Const(n-1.0)))
     | Pow(Const(n), e) -> Mul(Mul(Ln(Const(n)), Pow(Const(n), e)), Derivative(e))
     | Exp(X) -> Exp(X)
-    | Ln(X) -> Div(ONE, X)
+    | Ln(X) -> Div(Const( 1.), X)
     | Sin(X) -> Cos(X)
     | Cos(X) -> Neg(Sin(X))
-    | Tan(X) -> Div(ONE, Pow(Cos(X), TWO))
+    | Tan(X) -> Div(Const( 1.), Pow(Cos(X), Const( 2.)))
     | Func( g, f) ->
         let g' = Derivative(g(X))
         let f' = Derivative(f)
