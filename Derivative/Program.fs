@@ -1,22 +1,18 @@
 ﻿open System
+open System.Numerics
 
 // Learn more about F# at http://fsharp.org
 // See the 'F# Tutorial' project for more help.
-let (|Integer|_|) (str: string) =
-   let mutable intvalue = 0
-   if System.Int32.TryParse(str, &intvalue) then Some(intvalue)
-   else None
 
-let (|Float|_|) (str: string) =
-   let mutable floatvalue = 0.0
-   if System.Double.TryParse(str, &floatvalue) then Some(floatvalue)
-   else None
+let printn N =
+   let IsNearlyInt x =
+    let epsilon = 1e-10
+    abs (x - round(x)) < epsilon
 
-let printNumber N =
-    match N with
-    | Integer i -> sprintf "%d" i
-    | Float f -> sprintf "%f" f
-    | _ -> failwith(sprintf "Unknown numeric type [%A]" N)
+   if IsNearlyInt N then 
+    sprintf "%d" (System.Convert.ToInt32(N))
+   else 
+    sprintf "%f" N
 
 type Expression = 
     | X
@@ -76,11 +72,9 @@ let rec Derivative x : Expression =
         match g' with
         | Func( dgf, dge) -> Mul(dgf(f), f')
         | Op( op, e1, e2) -> Mul(op(e1, e2), f')
+        // Need to do something when we have a negtive operator in here
         | _ -> failwith(sprintf "Unable to match compound function [%A]" g')
     | _ -> failwith(sprintf "Unable to match expression [%A]" x)
-
-    
-
 
 [<EntryPoint>]
 let main argv = 
