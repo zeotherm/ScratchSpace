@@ -67,16 +67,21 @@ let rec Derivative x : Expression =
     | Cos(X) -> Neg(Sin(X))
     | Tan(X) -> Div(Const( 1.), Pow(Cos(X), Const( 2.)))
     | Func( g, f) ->
-        let g' = Derivative(g(X))
+        let gx = g(X)
+        let g' = Derivative(gx)
         let f' = Derivative(f)
         match g' with
-        | Func( dgf, dge) -> Mul(dgf(f), f')
+        | Func( dgf, _) -> Mul(dgf(f), f')
         | Op( op, e1, e2) -> Mul(op(e1, e2), f')
-        // Need to do something when we have a negtive operator in here
+        | Neg( e ) -> Mul(Neg(e), f')
         | _ -> failwith(sprintf "Unable to match compound function [%A]" g')
     | _ -> failwith(sprintf "Unable to match expression [%A]" x)
 
 [<EntryPoint>]
 let main argv = 
-    printfn "%A" argv
+    let f = Cos(Pow(X, ONE))
+
+    let f' = Derivative(f)
+
+    printfn "%A" f'
     0 // return an integer exit code
