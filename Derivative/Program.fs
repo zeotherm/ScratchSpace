@@ -77,11 +77,61 @@ let rec Derivative x : Expression =
         | _ -> failwith(sprintf "Unable to match compound function [%A]" g')
     | _ -> failwith(sprintf "Unable to match expression [%A]" x)
 
+let rec Simplify x : Expression =
+    match x with
+    | Add( Const(n1), Const(n2)) -> Const(n1+n2)
+    | Sub( Const(n1), Const(n2)) -> Const(n1-n2)
+    | Mul( Const(n1), Const(n2)) -> Const(n1*n2)
+    | Div( Const(n1), Const(n2)) -> Const(n1/n2)
+    | Neg( Const(0.)) -> Const(0.)
+    | Neg(Neg(e)) -> e |> Simplify
+    | Neg( e) -> Neg( Simplify e)
+    | Add( e, Const(0.)) | Add( Const(0.), e) -> e |> Simplify
+    | Add( Const(n), e) -> Add(e, Const(n)) |> Simplify
+    | Add( e1, Neg(e2)) -> Sub(e1, e2) |> Simplify
+    | Add( Neg(e1), e2) -> Sub(e2, e1) |> Simplify
+    | Sub( e, Const(0.)) -> e |> Simplify
+    | Sub( Const(0.), e) -> Neg(e) |> Simplify
+    | Mul( Const(1.), e) -> e |> Simplify
+    | Mul( e, Const(1.)) -> e |> Simplify
+    | Mul( _, Const(0.)) -> Const(0.)
+    | Mul( Const(0.), _) -> Const(0.)
+    | Mul( e, Const(n)) -> Mul(Const(n), e) |> Simplify
+    | Mul( Div( Const(n), e1), e2) -> Mul(Const(n), Div(e1, e2)) |> Simplify
+    | Mul( e1, Div( Const(n), e2)) -> Mul(Const(n), Div(e1, e2)) |> Simplify
+    | Mul( Neg(e1), e2) -> Neg(Mul(e1, e2)) |> Simplify
+    | Mul( e1, Neg(e2)) -> Neg(Mul(e1, e2)) |> Simplify
+    | Div( Const(0.), e) -> Const(0.)
+    | Div( e, Const(1.)) -> e |> Simplify
+    | Div( Neg(e1), e2) -> Neg( Div(e1, e2)) |> Simplify
+    | Div( e1, Neg(e2)) -> Neg( Div(e1, e2)) |> Simplify
+    | Pow( Const(0.), _) -> Const(0.)
+    | Pow( Const(1.), _) | Pow( _, Const(0.)) -> Const(1.)
+    | Pow( e, Const(1.)) -> e |> Simplify
+    | Op( op, e1, e2) ->
+        let e1s = Simplify e1
+        let e2s = Simplify e2
+        if e1s <> e1 || e2s <> e2 then
+            op(e1s, e2s) |> Simplify
+        else
+            op( e1, e2)
+    | Func(f, e) -> 
+        let es = Simplify e
+        if es <> e then
+            f( es) |> Simplify
+        else 
+            f(e)
+    | _ -> x
+
 [<EntryPoint>]
 let main argv = 
     let f = Cos(Pow(X, ONE))
 
     let f' = Derivative(f)
 
-    printfn "%A" f'
+    printfn "%A" (Simplify f)
+    printfn "%A" (Simplify f')
+
+    let g = Add(Mul(Const(0.), X), Mul(Const(5.), Const(1.)))
+    printfn "%A" (Simplify g)
     0 // return an integer exit code
