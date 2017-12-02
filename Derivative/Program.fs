@@ -47,35 +47,33 @@ let (|Func|_|) (x : Expression) =
     | Tan(e) -> Some(Tan, e)
     | _ -> None
 
-let ZERO = Const( 0.)
-let ONE = Const( 1.)
-let TWO = Const( 2.)
-let rec Derivative x : Expression = 
-    match x with
-    | X -> Const( 1.)
-    | Const(n) -> Const( 0.)
-    | Neg(e) -> Neg(Derivative(e))
-    | Add(e1, e2) -> Add( Derivative(e1), Derivative(e2))
-    | Sub(e1, e2) -> Sub( Derivative(e1), Derivative(e2))
-    | Mul(e1, e2) -> Add( Mul(Derivative(e1), e2), Mul(e1, Derivative(e2)))
-    | Div(e1, e2) -> Div( Sub(Mul(Derivative(e1), e2), Mul(e1, Derivative(e2))), Pow(e2, Const(2.0)))
-    | Pow(e, Const(n)) -> Mul( Const(n), Pow(e, Const(n-1.0)))
-    | Pow(Const(n), e) -> Mul(Mul(Ln(Const(n)), Pow(Const(n), e)), Derivative(e))
-    | Exp(X) -> Exp(X)
-    | Ln(X) -> Div(Const( 1.), X)
-    | Sin(X) -> Cos(X)
-    | Cos(X) -> Neg(Sin(X))
-    | Tan(X) -> Div(Const( 1.), Pow(Cos(X), Const( 2.)))
-    | Func( g, f) ->
-        let gx = g(X)
-        let g' = Derivative(gx)
-        let f' = Derivative(f)
-        match g' with
-        | Func( dgf, _) -> Mul(dgf(f), f')
-        | Op( op, e1, e2) -> Mul(op(e1, e2), f')
-        | Neg( e ) -> Mul(Neg(e), f')
-        | _ -> failwith(sprintf "Unable to match compound function [%A]" g')
-    | _ -> failwith(sprintf "Unable to match expression [%A]" x)
+let OpName op =
+    match op with
+    | Add(_, _) -> "+"
+    | Sub(_, _) -> "-"
+    | Mul(_, _) -> "*"
+    | Div(_, _) -> "/"
+    | Pow(_, _) -> "^"
+    | _ -> failwith(sprintf "Unknown operator [%A]" op)
+
+let FuncName f a =
+    match f with 
+    | Exp(_) -> sprintf "e^(%s)" a
+    | Ln(_) -> sprintf "ln(%s)" a
+    | Sin(_) -> sprintf "sin(%s)" a
+    | Cos(_) -> sprintf "cos(%s)" a
+    | Tan(_) -> sprintf "tan(%s)" a
+    | _ -> failwith( sprintf "Unrecognized function [%A]" f)
+
+let rec FormatExpression e =
+    match e with
+    | X -> "x"
+    | Const(n) -> printn n
+    | Neg x -> sprintf "-%s" (FormatExpression x)
+    | Op(_, left, right) -> "(" + (FormatExpression left) + " " + (OpName e) + " " + (FormatExpression right) + ")"
+    | Func(_, arg) -> (FuncName e) (FormatExpression arg)
+    | _ -> failwith(sprintf "Unknown expression type to format [%A]" e)
+
 
 let rec Simplify x : Expression =
     match x with
@@ -123,15 +121,47 @@ let rec Simplify x : Expression =
             f(e)
     | _ -> x
 
+let rec Derivative y : Expression = 
+    let y' = 
+        match y with
+        | X -> Const( 1.)
+        | Const(n) -> Const( 0.)
+        | Neg(e) -> Neg(Derivative(e))
+        | Add(e1, e2) -> Add( Derivative(e1), Derivative(e2))
+        | Sub(e1, e2) -> Sub( Derivative(e1), Derivative(e2))
+        | Mul(e1, e2) -> Add( Mul(Derivative(e1), e2), Mul(e1, Derivative(e2)))
+        | Div(e1, e2) -> Div( Sub(Mul(Derivative(e1), e2), Mul(e1, Derivative(e2))), Pow(e2, Const(2.0)))
+        | Pow(e, Const(n)) -> Mul( Const(n), Pow(e, Const(n-1.0)))
+        | Pow(Const(n), e) -> Mul(Mul(Ln(Const(n)), Pow(Const(n), e)), Derivative(e))
+        | Exp(X) -> Exp(X)
+        | Ln(X) -> Div(Const( 1.), X)
+        | Sin(X) -> Cos(X)
+        | Cos(X) -> Neg(Sin(X))
+        | Tan(X) -> Div(Const( 1.), Pow(Cos(X), Const( 2.)))
+        | Func( g, f) ->
+            let g' = Derivative(g(X))
+            let f' = Derivative(f)
+            match g' with
+            | Func( dgf, _) -> Mul(dgf(f), f')
+            | Op( op, e1, e2) -> Mul(op(e1, e2), f')
+            | Neg( e ) -> Mul(Neg(e), f')
+            | _ -> failwith(sprintf "Unable to match compound function [%A]" g')
+        | _ -> failwith(sprintf "Unable to match expression [%A]" y)
+    Simplify y'
+
 [<EntryPoint>]
 let main argv = 
-    let f = Cos(Pow(X, ONE))
+    let f = Cos(Pow(X, Const(1.0)))
 
     let f' = Derivative(f)
 
     printfn "%A" (Simplify f)
+    printfn "%s" (FormatExpression (Simplify f))
     printfn "%A" (Simplify f')
+    printfn "%s" (FormatExpression (Simplify f'))
+
 
     let g = Add(Mul(Const(0.), X), Mul(Const(5.), Const(1.)))
     printfn "%A" (Simplify g)
+    printfn "%s" (FormatExpression (Simplify g))
     0 // return an integer exit code
