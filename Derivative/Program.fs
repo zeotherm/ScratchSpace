@@ -95,6 +95,9 @@ let rec Simplify x : Expression =
     | Mul( _, Const(0.)) -> Const(0.)
     | Mul( Const(0.), _) -> Const(0.)
     | Mul( e, Const(n)) -> Mul(Const(n), e) |> Simplify
+    | Mul( Const(n), Mul(Const(m), e)) -> Mul(Const(n*m), e) |> Simplify
+    | Mul( Const(n), Add(e, f)) -> Add(Mul(Const(n), e), Mul(Const(n), f)) |> Simplify
+    // Can I add a Mul(Const(n), Op(foo, bar, baz) in here to implement the distributive property of multiplication?
     | Mul( Div( Const(n), e1), e2) -> Mul(Const(n), Div(e1, e2)) |> Simplify
     | Mul( e1, Div( Const(n), e2)) -> Mul(Const(n), Div(e1, e2)) |> Simplify
     | Mul( Neg(e1), e2) -> Neg(Mul(e1, e2)) |> Simplify
@@ -164,4 +167,8 @@ let main argv =
     let g = Add(Mul(Const(0.), X), Mul(Const(5.), Const(1.)))
     printfn "%A" (Simplify g)
     printfn "%s" (FormatExpression (Simplify g))
+
+    let h = Mul(Mul(Const(2.), X), Const(3.))
+    printfn "%A" (Simplify h)
+    printfn "%s" (FormatExpression (Simplify h))
     0 // return an integer exit code
