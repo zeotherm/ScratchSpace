@@ -65,15 +65,20 @@ let FuncName f a =
     | Tan(_) -> sprintf "tan(%s)" a
     | _ -> failwith( sprintf "Unrecognized function [%A]" f)
 
-let rec FormatExpression e =
-    match e with
-    | X -> "x"
-    | Const(n) -> printn n
-    | Neg x -> sprintf "-%s" (FormatExpression x)
-    | Op(_, left, right) -> "(" + (FormatExpression left) + " " + (OpName e) + " " + (FormatExpression right) + ")"
-    | Func(_, arg) -> (FuncName e) (FormatExpression arg)
-    | _ -> failwith(sprintf "Unknown expression type to format [%A]" e)
-
+let FormatExpression e =
+    let rec FormatSubExpression (outer : Expression option, inner : Expression) : string =
+        match inner with
+        | X -> "x"
+        | Const(n) -> printn n
+        | Neg x -> sprintf "-%s" (FormatSubExpression(Some(inner), x))
+        | Op(_, left, right) -> 
+            let s = FormatSubExpression(Some(inner), left) + " " + OpName(inner) + " " + FormatSubExpression(Some(inner), right) 
+            match outer with
+            | None -> s
+            | _ -> "(" + s + ")"
+        | Func(_, arg) -> FuncName(inner) (FormatSubExpression(None, arg))
+        | _ -> failwith(sprintf "Unknown expression type to format [%A]" e)
+    FormatSubExpression( None, e)
 
 let rec Simplify x : Expression =
     match x with
@@ -95,7 +100,6 @@ let rec Simplify x : Expression =
     | Mul( _, Const(0.)) -> Const(0.)
     | Mul( Const(0.), _) -> Const(0.)
     | Mul( e, Const(n)) -> Mul(Const(n), e) |> Simplify
-    //| Mul( Const(n), Mul(Const(m), e)) -> Mul(Const(n*m), e) |> Simplify
     | Mul( Const(n), Add(e, f)) -> Add(Mul(Const(n), e), Mul(Const(n), f)) |> Simplify
     | Mul( Const(n), Sub(l, r)) -> Sub(Mul(Const(n), l), Mul(Const(n), r)) |> Simplify
     | Mul( Const(n), Mul(l, r)) -> Mul(Mul(Const(n), l), r) |> Simplify
@@ -155,21 +159,35 @@ let rec Derivative y : Expression =
 
 [<EntryPoint>]
 let main argv = 
-    //let f = Cos(Pow(X, Const(1.0)))
+    let f = Cos(Pow(X, Const(1.0)))
 
-    //let f' = Derivative(f)
+    let f' = Derivative(f)
 
-    //printfn "%A" (Simplify f)
-    //printfn "%s" (FormatExpression (Simplify f))
-    //printfn "%A" (Simplify f')
-    //printfn "%s" (FormatExpression (Simplify f'))
+    printfn "%A" (Simplify f)
+    printfn "%s" (FormatExpression (Simplify f))
+    printfn "%A" (Simplify f')
+    printfn "%s" (FormatExpression (Simplify f'))
 
 
-    //let g = Add(Mul(Const(0.), X), Mul(Const(5.), Const(1.)))
-    //printfn "%A" (Simplify g)
-    //printfn "%s" (FormatExpression (Simplify g))
+    let g = Add(Mul(Const(0.), X), Mul(Const(5.), Const(1.)))
+    printfn "%A" (Simplify g)
+    printfn "%s" (FormatExpression (Simplify g))
 
-    let h = Mul(Add(Const(2.), X), Const(3.))
-    printfn "%A" (Simplify h)
+    let h = Mul(Mul(Const(2.), X), Const(3.))
+    printfn "%s" (FormatExpression h)
     printfn "%s" (FormatExpression (Simplify h))
+
+    let t1 = FormatExpression(Mul(Const(2.), X))
+    let t2 = FormatExpression(Mul(Const(3.), Mul(Const(2.), X)))
+    let t3 = FormatExpression(Mul(Mul(Const(2.), X), Const(3.)))
+    let t4 = FormatExpression(Mul(Add(X, Const(2.)), Const(3.)))
+    let t5 = FormatExpression(Neg(Mul(Const(2.), X)))
+    let t6 = FormatExpression(Sin(X))
+    printfn "%s" t1
+    printfn "%s" t2
+    printfn "%s" t3
+    printfn "%s" t4
+    printfn "%s" t5
+    printfn "%s" t6
+    
     0 // return an integer exit code
