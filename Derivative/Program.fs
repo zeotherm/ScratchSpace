@@ -66,16 +66,21 @@ let FuncName f a =
     | _ -> failwith( sprintf "Unrecognized function [%A]" f)
 
 let FormatExpression e =
+    let addParens o s =
+        match o with
+        | None -> s
+        | _ -> "(" + s + ")"
+ 
     let rec FormatSubExpression (outer : Expression option, inner : Expression) : string =
         match inner with
         | X -> "x"
         | Const(n) -> printn n
         | Neg x -> sprintf "-%s" (FormatSubExpression(Some(inner), x))
+        | Mul( left, right) ->
+            addParens outer (FormatSubExpression(Some(inner), left) + FormatSubExpression(Some(inner), right))
         | Op(_, left, right) -> 
             let s = FormatSubExpression(Some(inner), left) + " " + OpName(inner) + " " + FormatSubExpression(Some(inner), right) 
-            match outer with
-            | None -> s
-            | _ -> "(" + s + ")"
+            addParens outer s 
         | Func(_, arg) -> FuncName(inner) (FormatSubExpression(None, arg))
         | _ -> failwith(sprintf "Unknown expression type to format [%A]" e)
     FormatSubExpression( None, e)
