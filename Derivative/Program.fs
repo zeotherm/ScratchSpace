@@ -70,7 +70,7 @@ let FormatExpression e =
         match o with
         | None -> s
         | _ -> "(" + s + ")"
- 
+    // NB: Only need to be wrapped in parens if there is an order of operation mismatch... (^) >> (*/) >> (+-)
     let rec FormatSubExpression (outer : Expression option, inner : Expression) : string =
         match inner with
         | X -> "x"
@@ -182,17 +182,14 @@ let main argv =
     printfn "%s" (FormatExpression h)
     printfn "%s" (FormatExpression (Simplify h))
 
-    let t1 = FormatExpression(Mul(Const(2.), X))
-    let t2 = FormatExpression(Mul(Const(3.), Mul(Const(2.), X)))
-    let t3 = FormatExpression(Mul(Mul(Const(2.), X), Const(3.)))
-    let t4 = FormatExpression(Mul(Add(X, Const(2.)), Const(3.)))
-    let t5 = FormatExpression(Neg(Mul(Const(2.), X)))
-    let t6 = FormatExpression(Sin(X))
-    printfn "%s" t1
-    printfn "%s" t2
-    printfn "%s" t3
-    printfn "%s" t4
-    printfn "%s" t5
-    printfn "%s" t6
+    let e4 = Mul(Add(X, Const(2.)), Const(3.))
+    let t4 = Simplify e4
+
+    printfn "============="
+
+    printfn "%A" e4
+    printfn "%A" t4
+    printfn "%s" (FormatExpression e4)
+    printfn "%s" (FormatExpression t4)
     
     0 // return an integer exit code
