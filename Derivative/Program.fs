@@ -47,6 +47,18 @@ let (|Func|_|) (x : Expression) =
     | Tan(e) -> Some(Tan, e)
     | _ -> None
 
+let Tokenize (value : System.String) = 
+    let value = value.Replace(" ", "")
+    let value = value.Replace("e^(", "e(")
+    let value = value.Replace("(", " ( ")
+    let value = value.Replace(")", " ) ")
+    let value = value.Replace("+", " + ")
+    let value = value.Replace("-", " - ")
+    let value = value.Replace("*", " * ")
+    let value = value.Replace("/", " / ")
+    let value = value.Replace("^", " ^ ")
+    value.Trim().Split([|' '|]) |> Seq.toList |> List.filter (fun e -> e.Length > 0)
+
 let OpName op =
     match op with
     | Add(_, _) -> "+"
@@ -192,4 +204,7 @@ let main argv =
     printfn "%s" (FormatExpression e4)
     printfn "%s" (FormatExpression t4)
     
+    let ts = Tokenize "(x*4)*sin(x)*(30 + 40)"
+    printfn "%A" ts
+
     0 // return an integer exit code
