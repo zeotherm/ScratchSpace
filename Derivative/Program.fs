@@ -59,6 +59,27 @@ let Tokenize (value : System.String) =
     let value = value.Replace("^", " ^ ")
     value.Trim().Split([|' '|]) |> Seq.toList |> List.filter (fun e -> e.Length > 0)
 
+let IsOperator x =
+    match x with
+    | "+" | "-" | "*" | "/" | "^" -> true
+    | _ -> false
+
+let rec LevelTokens ts level =
+    match ts with 
+    | [] -> []
+    | "(" :: t -> LevelTokens t (level+1)
+    | ")" :: t -> LevelTokens t (level-1)
+    | h :: t when IsOperator(h) -> (h, level) :: (LevelTokens t level)
+    | h :: t -> (h, level) :: (LevelTokens t level)
+
+let GroupTokens ts =
+    let GroupTokensAux item acc =
+        match acc, item with
+        | [], (s, l) -> [([s], l)]
+        | (s', l') :: t, (s, l) when l = l' -> (s :: s', l) :: t
+        | h :: t, (s, l) -> ([s], l) :: h :: t
+    List.foldBack GroupTokensAux ts [] |> List.map fst
+
 let OpName op =
     match op with
     | Add(_, _) -> "+"
