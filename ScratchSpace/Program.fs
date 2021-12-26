@@ -1,22 +1,9 @@
-﻿open System.Security.AccessControl
-open System
-// Learn more about F# at http://fsharp.org
+﻿// Learn more about F# at http://fsharp.org
 // See the 'F# Tutorial' project for more help.
-
-let printList l = 
-    l |> Seq.iter (printf "%A\n")
-
-let readListFromInput converter = 
-    let rec readHelper entries = 
-        match System.Console.ReadLine() with 
-        | "" | null -> List.rev entries
-        | e -> readHelper ((converter e) :: entries)
-    readHelper []
-
-let asInts = fun e -> e |> int
-let asDoubles = fun e -> e |> double
-let asIntList = fun (e:string) -> e.Split(' ') |> Array.toList |> List.map System.Int32.Parse 
-let asStrings = id
+open System
+open ScratchUtils
+open Serpenski
+open Geometry
 
 let rec printHelloWorld n = 
     match n with 
@@ -118,15 +105,7 @@ let integrationProblem() =
     printfn "%f" (integrate f bounds deltax)
     printfn "%f" (volumeOfRevolution f bounds deltax)
 
-type OrderedPair = 
-    { x : int; y : int}
-    override m.ToString() = sprintf "(%d,%d)" m.x m.y
 type TestCase = OrderedPair list
-type Polygon = OrderedPair list
-let makeOrderedPair elem = 
-    match elem with 
-    | i::j::[] -> { x = i; y = j}
-    | _ -> failwith "Not a valid pair entry"
 
 let makeTestCase inp = 
     inp |> List.fold (fun acc elem -> (makeOrderedPair elem)::acc) []
@@ -145,28 +124,6 @@ let isValidFunction tc =
     let xs = List.groupBy (fun e -> e.x) tc |> List.map snd
     if (List.map testOneX xs |> List.fold (fun acc elem -> acc && elem) true ) then "YES" else "NO"
 
-let distance (p:OrderedPair) (q:OrderedPair) = 
-    System.Math.Sqrt(pown (double p.x - double q.x) 2 + pown (double p.y - double q.y) 2)
-
-let PolygonCloser (p:Polygon) =
-    if List.head p <> List.last p then 
-        (List.head p)::(List.rev p)
-    else 
-        p
-
-let perimeter (p:Polygon) = 
-    let rec perimeter_helper p_aug = 
-        match p_aug with 
-        | p::q::t -> distance p q + perimeter_helper (q::t)
-        | _ -> 0.0
-    perimeter_helper (PolygonCloser p)
-
-let area (p:Polygon) =
-    let rec area_helper (pgon:Polygon) =
-        match pgon with
-        | p::q::t -> double (p.x*q.y - q.x*p.y) + area_helper (q::t)
-        | _ -> 0.0
-    0.5 * System.Math.Abs (area_helper (PolygonCloser p))
 
 let rec gcd a b =
     match b with 
@@ -179,11 +136,11 @@ let modval = pown 10 8 + 7
 let memoize f =
     let cache = ref Map.empty
     fun x ->
-        match (!cache).TryFind(x) with
+        match (cache.Value).TryFind(x) with
         | Some res -> res
         | None ->
              let res = f x
-             cache := (!cache).Add(x,res)
+             cache.Value <- (cache.Value).Add(x,res)
              res
 
 let fibonacci N =
@@ -265,61 +222,6 @@ let higherFibs = Seq.unfold (fun (a,b) ->
 let fib01 = seq {0 .. 1} 
 let fib01I = [0I; 1I] |> List.toSeq
 let fibSeq = Seq.append fib01 higherFibs
-
-// Serpinski Triangle
-type Tri = int * int * int
-
-let step (ts : Tri list) =
-  [ for t in ts do
-      let x, y, n = t
-      yield! [ x, y, n-1
-               x-(pown 2 (n-2)), y + (pown 2 (n-2)), n-1
-               x+(pown 2 (n-2)), y + (pown 2 (n-2)), n-1 ] ]
-
-// drawing canvas of width * height * rows
-type Canvas = int * int * string list
-
-// point on the canvas
-type Point = int * int
-
-// draws horisontal line from x of length n in row
-let drawhlr (row : string) (x : int) (n : int) =
-  let len = row.Length
-  if x < len then
-    let s1 = row.Substring(0, x)
-    let p = x + n
-    if p < len then
-      let s2 = String('1', n)
-      let s3 = row.Substring(p)
-      sprintf "%s%s%s" s1 s2 s3
-    else
-      let s2 = String('1', len - x)
-      sprintf "%s%s" s1 s2
-  else row
-
-// draws horisontal line from p of length n on the canvas
-let drawhl (c : Canvas) (p : Point) (n : int) =
-  let w, h, rows = c
-  let x, y = p
-  let newr = rows
-             |> List.mapi (fun i row ->
-                             if y = i then drawhlr row x n  
-                             else row)
-  w, h, newr
-
-// draws triangle on canvas
-let draw (c : Canvas) (t : Tri) =
-  let x, y, n = t
-  let lines = [ for i in 1..(pown 2 (n-1)) do
-                  yield (x-(i-1), y+(i-1)), i*2-1 ]
-  lines
-  |> List.fold (fun c v -> drawhl c (fst v) (snd v)) c
-
-let render (c : Canvas) =
-  let _, _, rows = c
-  String.Join("\n", rows)
-
-
 
 [<EntryPoint>]
 let main argv =
