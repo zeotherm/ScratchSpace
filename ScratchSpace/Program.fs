@@ -225,10 +225,38 @@ let fibSeq = Seq.append fib01 higherFibs
 
 [<EntryPoint>]
 let main argv =
-    let N = System.Console.ReadLine() |> int
-    [1..N]
-    |> List.fold (fun ts _ -> step ts) [ (31, 0, 6) ]
-    |> List.fold (fun c t -> draw c t) (63, 32, [ for i in 0..31 do yield String('_', 63) ])
-    |> render
-    |> printf "%s"
+    // Serpenski triangle
+    //let N = System.Console.ReadLine() |> int
+    //[1..N]
+    //|> List.fold (fun ts _ -> step ts) [ (31, 0, 6) ]
+    //|> List.fold (fun c t -> draw c t) (63, 32, [ for i in 0..31 do yield String('_', 63) ])
+    //|> render
+    //|> printf "%s"
+    
+    
+    let data = System.IO.File.ReadLines(@"D:\Matt\Downloads\input04.txt") |> Seq.toList
+
+    let N = data.Head //System.Console.ReadLine()
+    let input = List.map asOrderedPairs data.Tail //readListFromInput asOrderedPairs
+    let fixedInput: OrderedPair list = [{x = 1; y = 1};
+                                        {x = 2; y = 5};
+                                        {x = 3; y = 3};
+                                        {x = 5; y = 3};
+                                        {x = 3; y = 2};
+                                        {x = 2; y = 2}]
+    //let a: OrderedPair = {x = 1; y = 1}
+    //let b: OrderedPair = {x = 2; y = 5}
+    //let c: OrderedPair = {x = 3; y = 3}
+    //let d: OrderedPair = {x = 2; y = 2}
+    //let rotABC = rotationDirection a b c
+    //let rotCBA = rotationDirection c b a
+    //let rotACD = rotationDirection a c d
+
+    //let P0 = findP0 fixedInput
+    //let ps = sortByPolarAngle fixedInput
+    
+    //let hull = findConvexHull fixedInput
+    //let perim = perimeter hull
+
+    printfn "%.2f" (input |> findConvexHull |> perimeter) 
     0 // return an integer exit code
